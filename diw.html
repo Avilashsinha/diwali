@@ -115,13 +115,11 @@
       left: 50%;
       transform: translate(-50%, -50%) scale(0.85);
       background: rgba(20, 20, 20, 0.9);
-      /* Less transparent, dark background */
       border: 1px solid rgba(255, 255, 255, 0.1);
       padding: 40px 50px;
       border-radius: 24px;
       text-align: center;
       backdrop-filter: blur(8px);
-      /* slightly reduced blur */
       box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
       z-index: 10;
       opacity: 0;
@@ -139,7 +137,6 @@
       font-family: 'Great Vibes', cursive;
       font-size: 3.8rem;
       color: #ffdd44;
-      /* bright golden */
       text-shadow: 0 0 35px #ffdd44, 0 0 60px #ffb86b;
       white-space: nowrap;
       overflow: hidden;
@@ -213,13 +210,10 @@
       text-align: center;
       font-size: 1rem;
       font-weight: 700;
-      /* bold */
       color: #fff;
-      /* plain white */
       z-index: 5;
     }
 
-    /* Start overlay for autoplay compliance */
     .start-overlay {
       position: fixed;
       top: 0;
@@ -234,6 +228,7 @@
       align-items: center;
       backdrop-filter: blur(10px);
       transition: opacity 0.5s ease;
+      text-align: center;
     }
 
     .start-overlay.hidden {
@@ -261,15 +256,8 @@
     }
 
     @keyframes pulse {
-
-      0%,
-      100% {
-        transform: scale(1);
-      }
-
-      50% {
-        transform: scale(1.05);
-      }
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
     }
 
     .start-overlay h2 {
@@ -286,19 +274,23 @@
       color: rgba(255, 255, 255, 0.9);
     }
 
+    .volume-note {
+      font-size: 1rem;
+      color: #ffb86b;
+      text-shadow: 0 0 10px rgba(255,184,107,0.6);
+      margin-bottom: 20px;
+      animation: glow 1.8s infinite alternate;
+    }
+
+    @keyframes glow {
+      from { opacity: 0.7; }
+      to { opacity: 1; }
+    }
+
     @media (max-width: 600px) {
-      h1 {
-        font-size: 1.6rem;
-      }
-
-      #typedText {
-        font-size: 2.5rem;
-      }
-
-      .side-diya {
-        width: 45px;
-        height: 30px;
-      }
+      h1 { font-size: 1.6rem; }
+      #typedText { font-size: 2.5rem; }
+      .side-diya { width: 45px; height: 30px; }
     }
   </style>
 </head>
@@ -309,15 +301,15 @@
   <div class="start-overlay" id="startOverlay">
     <h2>🪔 Happy Diwali 🪔</h2>
     <p>Click below to begin the celebration!</p>
+    <p class="volume-note">🔊 Please turn on your volume for the full festive experience!</p>
     <button class="start-btn" id="startBtn">Start Experience</button>
   </div>
 
   <canvas id="fwCanvas"></canvas>
-
   <div class="lights" id="lights"></div>
 
   <div class="content" id="mainContent">
-    <h1 id="festivalText"></h1> <!-- typing animation -->
+    <h1 id="festivalText"></h1>
     <p>May this Diwali fill your life with joy, peace, and prosperity.</p>
     <button class="btn" id="clickBtn">Click Here</button>
   </div>
@@ -328,12 +320,8 @@
     <button class="close-btn" id="closePopup">Close</button>
   </div>
 
-  <div class="side-diya left">
-    <div class="flame"></div>
-  </div>
-  <div class="side-diya right">
-    <div class="flame"></div>
-  </div>
+  <div class="side-diya left"><div class="flame"></div></div>
+  <div class="side-diya right"><div class="flame"></div></div>
 
   <footer>Developed by <strong>Avilash Sinha Roy</strong></footer>
 
@@ -397,33 +385,16 @@
     const startOverlay = document.getElementById("startOverlay");
     const startBtn = document.getElementById("startBtn");
 
-    // Start experience button - enables music autoplay
     startBtn.addEventListener("click", () => {
-      // Ensure music is loaded and ready
-      music.volume = 0.7; // Set volume to 70%
-      music.load(); // Reload the audio
-
-      // Start music with a slight delay to ensure loading
+      music.volume = 0.7;
+      music.load();
       setTimeout(() => {
-        music.play().then(() => {
-          console.log('Music started successfully');
-        }).catch((error) => {
-          console.error('Error playing music:', error);
-          // Try one more time
-          setTimeout(() => {
-            music.play().catch(e => console.error('Retry failed:', e));
-          }, 500);
-        });
+        music.play().catch(() => {});
       }, 100);
-
-      // Hide overlay
       startOverlay.classList.add('hidden');
-
-      // Start typing animation
       typeText(festivalText, "Celebrate the Festival of Lights ✨", 120);
     });
 
-    // multicolor bulbs
     const colors = ['#ff7675', '#74b9ff', '#55efc4', '#ffeaa7', '#fab1a0', '#a29bfe'];
     for (let i = 0; i < 20; i++) {
       const bulb = document.createElement('div');
@@ -435,40 +406,27 @@
       lights.appendChild(bulb);
     }
 
-    // typing animation function
     function typeText(element, text, speed = 100) {
       element.textContent = "";
       let i = 0;
       const interval = setInterval(() => { element.textContent = text.slice(0, i++); if (i > text.length) clearInterval(interval); }, speed);
     }
 
-    // Stop music when user leaves the page
     window.addEventListener('beforeunload', () => {
       music.pause();
       music.currentTime = 0;
     });
 
-    // Pause/resume music when tab visibility changes
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        music.pause();
-      } else {
-        // Only resume if user has already started the experience
-        if (startOverlay.classList.contains('hidden')) {
-          music.play().catch(() => { });
-        }
-      }
+      if (document.hidden) music.pause();
+      else if (startOverlay.classList.contains('hidden')) music.play().catch(() => {});
     });
 
     btn.addEventListener("click", () => {
       popup.classList.add("active");
       mainContent.style.opacity = "0";
-      // Ensure music is playing
-      if (music.paused) {
-        music.play().catch(e => console.error('Music play error:', e));
-      }
+      if (music.paused) music.play().catch(() => {});
       typeText(typedText, "🎆 Happy Diwali 🎆", 150);
-      // continuous fireworks
       setInterval(() => fireworks(rand(cw * 0.2, cw * 0.8), rand(ch * 0.2, ch * 0.7)), 600);
     });
 
@@ -479,5 +437,4 @@
     });
   </script>
 </body>
-
 </html>
